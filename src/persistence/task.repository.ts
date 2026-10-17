@@ -28,6 +28,7 @@ const TASK_COLUMNS = `
     id, titulo, descripcion, fecha_vencimiento, estado, creado_en, actualizado_en
 `;
 
+/** Lista las tareas filtradas por el ID del propietario autenticado. */
 export async function listTasksByUser(userId: string): Promise<TaskRecord[]> {
     const result = await pool.query<TaskRecord>(
         `SELECT ${TASK_COLUMNS}
@@ -40,6 +41,7 @@ export async function listTasksByUser(userId: string): Promise<TaskRecord[]> {
     return result.rows;
 }
 
+/** Busca por ID y propietario; devuelve null si falta o pertenece a otro usuario. */
 export async function findTaskByIdForUser(
     taskId: string,
     userId: string,
@@ -54,6 +56,7 @@ export async function findTaskByIdForUser(
     return result.rows[0] ?? null;
 }
 
+/** Crea la tarea para el propietario proporcionado por el servicio autenticado. */
 export async function createTaskForUser(
     userId: string,
     task: CreateTaskData,
@@ -81,6 +84,7 @@ export async function createTaskForUser(
     return createdTask;
 }
 
+/** Actualiza solo la combinación de tarea y propietario; en otro caso, devuelve null. */
 export async function updateTaskForUser(
     taskId: string,
     userId: string,
@@ -117,6 +121,7 @@ export async function updateTaskForUser(
     return result.rows[0] ?? null;
 }
 
+/** Elimina solo la combinación de tarea y propietario indicada. */
 export async function deleteTaskForUser(
     taskId: string,
     userId: string,

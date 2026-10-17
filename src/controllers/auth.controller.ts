@@ -6,6 +6,7 @@ import { loginUser } from '../services/login-user.service';
 import { ACCESS_TOKEN_TTL_SECONDS } from '../services/jwt.service';
 import { ValidationError } from '../errors/app-error';
 
+/** Atiende `POST /auth/register` y devuelve únicamente campos públicos. */
 export async function register(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body);
 
@@ -27,6 +28,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     });
 }
 
+/** Atiende `POST /auth/login` y devuelve un token Bearer de corta duración. */
 export async function login(req: Request, res: Response): Promise<void> {
     const parsed = loginUserSchema.safeParse(req.body);
 

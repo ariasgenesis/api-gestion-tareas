@@ -3,6 +3,7 @@ import express, { type Application, type Request, type Response } from 'express'
 import cors from 'cors';
 import helmet from 'helmet';
 import authRouter from './api/auth.routes';
+import docsRouter from './api/docs.routes';
 import taskRouter from './api/task.routes';
 import { env } from './config/env';
 import { notFoundHandler } from './middleware/not-found';
@@ -20,6 +21,7 @@ app.use(express.json({ limit: '64kb' }));
 
 app.use('/auth', authRouter);
 app.use('/tasks', taskRouter);
+app.use('/docs', docsRouter);
 
 // Ruta raíz: información básica de la API
 app.get('/', (_req: Request, res: Response) => {

@@ -16,17 +16,20 @@ import {
     updateTask,
 } from '../services/task.service';
 
+/** Lista únicamente las tareas del usuario autenticado. */
 export async function list(req: Request, res: Response): Promise<void> {
     const tasks = await listTasks(getAuthenticatedUserId(req));
     res.status(200).json({ tareas: tasks });
 }
 
+/** Devuelve una tarea solo si pertenece al usuario autenticado. */
 export async function getById(req: Request, res: Response): Promise<void> {
     const taskId = parseTaskId(req.params.id);
     const task = await getTask(taskId, getAuthenticatedUserId(req));
     res.status(200).json({ tarea: task });
 }
 
+/** Crea la tarea con el propietario del JWT verificado, nunca con el del cuerpo. */
 export async function create(req: Request, res: Response): Promise<void> {
     const parsed = createTaskSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -43,6 +46,7 @@ export async function create(req: Request, res: Response): Promise<void> {
     res.status(201).json({ mensaje: 'Tarea creada correctamente.', tarea: task });
 }
 
+/** Actualiza una tarea solo si pertenece al usuario autenticado. */
 export async function update(req: Request, res: Response): Promise<void> {
     const taskId = parseTaskId(req.params.id);
     const parsed = updateTaskSchema.safeParse(req.body);
@@ -64,6 +68,7 @@ export async function update(req: Request, res: Response): Promise<void> {
     res.status(200).json({ mensaje: 'Tarea actualizada correctamente.', tarea: task });
 }
 
+/** Elimina una tarea solo si pertenece al usuario autenticado. */
 export async function destroy(req: Request, res: Response): Promise<void> {
     const taskId = parseTaskId(req.params.id);
     await deleteTask(taskId, getAuthenticatedUserId(req));

@@ -34,6 +34,7 @@ psql --version
 | `cors` | `^2.8.6` | Control de orígenes permitidos para clientes web. |
 | `helmet` | `^8.3.0` | Encabezados HTTP de seguridad. |
 | `express-rate-limit` | `^8.7.1` | Límite de intentos al iniciar sesión. |
+| `swagger-ui-express` | `^5.0.1` | Publica la especificación OpenAPI mediante Swagger UI. |
 
 ### Dependencias de desarrollo y tipos
 
@@ -46,6 +47,7 @@ psql --version
 | `@types/pg` | `^8.23.1` | Tipos de PostgreSQL para TypeScript. |
 | `@types/jsonwebtoken` | `^9.0.10` | Tipos de JWT para TypeScript. |
 | `@types/cors` | `^2.8.19` | Tipos de CORS para TypeScript. |
+| `@types/swagger-ui-express` | `^4.1.8` | Tipos de Swagger UI para TypeScript. |
 
 PostgreSQL es un servicio externo al proyecto y debe instalarse/configurarse por separado; `pg` es el cliente Node.js, no el servidor de base de datos.
 
@@ -181,6 +183,8 @@ Todos los cuerpos y respuestas son JSON. Los errores siguen el formato centraliz
 |---|---|---|---|
 | `GET` | `/` | Público | Información básica de la API. |
 | `GET` | `/health` | Público | Disponibilidad de la API. |
+| `GET` | `/docs` | Público | Interfaz interactiva de Swagger UI. |
+| `GET` | `/docs/openapi.json` | Público | Especificación OpenAPI en JSON. |
 | `POST` | `/auth/register` | Público | Registra un usuario. |
 | `POST` | `/auth/login` | Público, limitado | Autentica y emite JWT. |
 | `GET` | `/tasks` | Bearer JWT | Lista las tareas propias. |
@@ -309,7 +313,13 @@ Todas las consultas de tareas filtran por el ID autenticado en el servidor. La A
 - `src/services`: reglas de negocio, validaciones y autenticación.
 - `src/persistence`: pool PostgreSQL, repositorios y esquema SQL.
 - `src/middleware`: autenticación, manejo centralizado de errores y controles HTTP.
+- `src/docs/openapi.ts`: contrato OpenAPI de rutas, autenticación, cuerpos y respuestas.
+- `src/api/docs.routes.ts`: Swagger UI en `/docs` y especificación en `/docs/openapi.json`.
 - `src/config/env.ts`: carga y validación de configuración; falla al inicio si faltan variables requeridas o sus valores son inválidos.
 - `src/app.ts`: configura y exporta Express sin abrir un puerto.
 - `src/server.ts`: comprueba PostgreSQL, inicia HTTP y gestiona el apagado.
 - `tests/api.integration.test.ts`: pruebas de integración de la API.
+
+Los controladores, el middleware JWT, la emisión/verificación de tokens y las
+consultas de tareas con filtro por propietario incluyen JSDoc en los puntos
+de contrato y seguridad más relevantes.

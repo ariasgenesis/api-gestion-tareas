@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 import { AuthenticationRequiredError } from '../errors/app-error';
 import { verifyAccessToken } from '../services/jwt.service';
 
+/** Verifica el token Bearer y adjunta su sujeto autenticado a la solicitud. */
 export const authenticateToken: RequestHandler = (req, _res, next) => {
     const authorization = req.get('authorization');
     const match = authorization?.match(/^Bearer\s+([^\s]+)$/i);

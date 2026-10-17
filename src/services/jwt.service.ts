@@ -12,6 +12,7 @@ export interface AccessTokenClaims {
     exp: number;
 }
 
+/** Firma un token HS256 de 15 minutos cuyo sujeto es el ID del usuario. */
 export function createAccessToken(userId: string): string {
     return jwt.sign({ sub: userId }, env.jwt.secret, {
         algorithm: JWT_ALGORITHM,
@@ -19,6 +20,7 @@ export function createAccessToken(userId: string): string {
     });
 }
 
+/** Verifica firma, algoritmo, expiración y claims requeridos del token. */
 export function verifyAccessToken(token: string): AccessTokenClaims {
     try {
         const payload = jwt.verify(token, env.jwt.secret, {
