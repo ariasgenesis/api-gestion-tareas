@@ -2,12 +2,6 @@
 import { Pool } from 'pg';
 import { env } from '../config/env';
 
-/**
- * Pool compartido de conexiones a PostgreSQL.
- *
- * Las consultas utilizan conexiones reutilizables,
- * en lugar de abrir una conexión nueva por operación.
- */
 export const pool = new Pool({
     host: env.database.host,
     port: env.database.port,
@@ -20,16 +14,10 @@ export const pool = new Pool({
     idleTimeoutMillis: 30000,
 });
 
-/**
- * Registra errores inesperados en conexiones inactivas.
- */
 pool.on('error', (error) => {
     console.error('Unexpected PostgreSQL pool error:', error.message);
 });
 
-/**
- * Comprueba la conectividad con PostgreSQL.
- */
 export async function checkDatabaseConnection(): Promise<void> {
     const client = await pool.connect();
 

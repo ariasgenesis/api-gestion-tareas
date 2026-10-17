@@ -3,3 +3,4 @@ dist
 .env
 database.sqlite
 .DS_Store
+task_manager_db.sqlite

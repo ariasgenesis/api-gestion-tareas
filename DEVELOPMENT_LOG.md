@@ -6,7 +6,7 @@
 - **Proyecto:** Sistema de Gestión de Tareas
 - **Tecnologías:** Node.js, Express, TypeScript y PostgreSQL
 - **Objetivo:** Desarrollar una API REST para la gestión de usuarios y tareas personales.
-- **Herramientas de IA utilizadas:** Codex y otras herramientas, si corresponde.
+- **Herramientas de IA utilizadas:** Codex
 
 ## 2. Registro de desarrollo
 
@@ -139,6 +139,52 @@ la persistencia y la respuesta.
 
 ---
 
+### Decisión 2: Rol dedicado de PostgreSQL
+
+**Decisión:**
+Configurar la aplicación con un rol de PostgreSQL propio (`task_app`) y
+privilegios limitados, en lugar de conectarla como `postgres` o con otro
+superusuario. El rol de aplicación recibe únicamente los permisos de lectura,
+inserción, actualización y borrado que necesita sobre las tablas, además del
+uso de sus secuencias.
+
+**Justificación:**
+Aplicar el principio de privilegio mínimo aísla las credenciales de la API de
+las tareas administrativas de la base de datos. Si una vulnerabilidad
+compromete la aplicación, limitar el rol reduce las operaciones que un tercero
+podría realizar. La creación del rol se reserva a una cuenta administradora;
+la API solo utiliza las credenciales del rol dedicado.
+
+### Decisión 3: Configuración validada al iniciar
+
+**Decisión:**
+Centralizar la lectura y validación de variables de entorno en
+`src/config/env.ts`. El módulo valida las variables obligatorias, comprueba
+rangos numéricos y booleanos, convierte sus valores a los tipos requeridos y
+expone la configuración una sola vez como objeto congelado con
+`Object.freeze()` (incluidos sus objetos anidados).
+Al exportarse desde un módulo de Node.js, la misma instancia se reutiliza a
+través de la caché de módulos durante el proceso.
+
+**Justificación:**
+La configuración inválida o incompleta provoca un error explícito al iniciar,
+en vez de fallos silenciosos durante una solicitud. La validación estricta
+también mantiene los valores de configuración tipados y centralizados para
+TypeScript.
+
+### Decisión 4: Separar Express del servidor HTTP
+
+**Decisión:**
+Mantener el registro de rutas y middlewares en `src/app.ts`, exportando allí la
+instancia de Express. `src/server.ts` comprueba la conexión con PostgreSQL,
+inicia el listener HTTP y gestiona el cierre ordenado del servidor y del pool.
+
+**Justificación:**
+Esta separación mantiene responsabilidades claras y deja la aplicación
+Express disponible para pruebas que no necesiten abrir un puerto real. El
+proceso de servidor conserva el control del ciclo de vida de la base de datos y
+de las señales de apagado.
+
 ## 4. Retos y soluciones
 
 ### Reto 1: Verificación del entorno
@@ -157,5 +203,8 @@ terminaron con los estados esperados.
 
 ## 5. Observaciones finales
 
-Pendiente: añadir pruebas automatizadas y middleware de autenticación cuando se
-implementen rutas protegidas. No se hicieron commits ni push.
+La API cuenta con registro e inicio de sesión, autenticación JWT y CRUD de
+tareas protegido por usuario. Las verificaciones automatizadas y las decisiones
+de configuración y seguridad se describen en los apartados anteriores. La
+configuración de PostgreSQL, incluido el rol dedicado, debe completarse por
+entorno antes de iniciar la aplicación.
