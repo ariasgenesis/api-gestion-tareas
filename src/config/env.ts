@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { parseCorsOrigins } from './cors-origins';
 
 function getRequiredEnv(name: string): string {
     const value = process.env[name]?.trim();
@@ -42,39 +43,7 @@ function getBoolean(name: string, defaultValue: boolean): boolean {
 }
 
 function getCorsOrigins(): string[] {
-    const configuredValue = process.env.CORS_ORIGINS;
-    if (!configuredValue && process.env.NODE_ENV === 'production') {
-        throw new Error('CORS_ORIGINS es obligatoria en producción.');
-    }
-    const configured = configuredValue ?? 'http://localhost:5173';
-    const origins = configured
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter(Boolean);
-
-    if (origins.length === 0) {
-        throw new Error('CORS_ORIGINS debe contener al menos un origen permitido.');
-    }
-
-    for (const origin of origins) {
-        let parsed: URL;
-        try {
-            parsed = new URL(origin);
-        } catch {
-            throw new Error('CORS_ORIGINS contiene un origen no válido.');
-        }
-
-        if (
-            !['http:', 'https:'].includes(parsed.protocol) ||
-            parsed.origin !== origin
-        ) {
-            throw new Error(
-                'Cada valor de CORS_ORIGINS debe ser un origen HTTP o HTTPS sin ruta.',
-            );
-        }
-    }
-
-    return origins;
+    return parseCorsOrigins(process.env.CORS_ORIGINS, process.env.NODE_ENV);
 }
 
 function getTrustProxyHops(): number {

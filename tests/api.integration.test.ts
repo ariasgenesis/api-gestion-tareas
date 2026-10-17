@@ -8,11 +8,23 @@ import { env } from '../src/config/env';
 import app from '../src/app';
 import { pool } from '../src/persistence/database';
 import { verifyAccessToken } from '../src/services/jwt.service';
+import { parseCorsOrigins } from '../src/config/cors-origins';
 
 interface ApiResponse<T = Record<string, unknown>> {
     response: Response;
     body: T;
 }
+
+test('normaliza barras finales en CORS_ORIGINS y mantiene la validación de orígenes', () => {
+    assert.deepEqual(
+        parseCorsOrigins('https://frontend.example/, http://localhost:5173/', 'production'),
+        ['https://frontend.example', 'http://localhost:5173'],
+    );
+    assert.throws(
+        () => parseCorsOrigins('https://frontend.example/app', 'production'),
+        /sin ruta/,
+    );
+});
 
 async function request<T = Record<string, unknown>>(
     baseUrl: string,

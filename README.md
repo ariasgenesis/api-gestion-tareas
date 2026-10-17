@@ -137,7 +137,7 @@ La variable debe contener al menos 32 bytes en UTF-8. Conserva `.env` en tu máq
 | `DB_PASSWORD` | Sí | Contraseña de ese rol. |
 | `DB_SSL` | No | `true` o `false`; predeterminado `false`. Si está activo, se valida el certificado TLS del servidor. |
 | `JWT_SECRET` | Sí | Secreto de firma JWT de al menos 32 bytes. |
-| `CORS_ORIGINS` | En producción | Orígenes web completos separados por comas, sin rutas. En desarrollo predeterminado: `http://localhost:5173`. |
+| `CORS_ORIGINS` | En producción | Orígenes web completos separados por comas, sin rutas; normaliza una barra final, por ejemplo `https://frontend.example/`. En desarrollo predeterminado: `http://localhost:5173`. |
 | `TRUST_PROXY_HOPS` | No | Saltos de proxy confiables, entero de `0` a `10`; predeterminado `0`. |
 
 `src/config/env.ts` valida y convierte estas variables durante la carga de la aplicación. Si falta una variable requerida o un valor no cumple el formato o rango permitido, el inicio falla con un error que identifica la configuración inválida.
