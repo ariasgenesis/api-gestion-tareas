@@ -1,3 +1,4 @@
+
 import app from './app';
 import { env } from './config/env';
 import {
@@ -7,7 +8,7 @@ import {
 
 async function startServer(): Promise<void> {
     try {
-        // Verifica la conexión antes de aceptar solicitudes.
+        // Comprobar PostgreSQL antes de iniciar Express.
         await checkDatabaseConnection();
 
         const server = app.listen(env.port, () => {
@@ -16,17 +17,17 @@ async function startServer(): Promise<void> {
             );
         });
 
-        let shuttingDown = false;
+        let isShuttingDown = false;
 
         async function shutdown(signal: string): Promise<void> {
-            if (shuttingDown) return;
-            shuttingDown = true;
+            if (isShuttingDown) return;
+            isShuttingDown = true;
 
             console.log(`Señal ${signal} recibida. Cerrando servidor...`);
 
             try {
                 await new Promise<void>((resolve, reject) => {
-                    server.close((error: Error | undefined) => {
+                    server.close((error) => {
                         if (error) {
                             reject(error);
                         } else {
@@ -53,7 +54,7 @@ async function startServer(): Promise<void> {
         });
     } catch (error) {
         console.error(
-            'No fue posible iniciar la aplicación. Verifica la configuración y la conexión a la base de datos.',
+            'No fue posible iniciar el servidor. Verifica la configuración y la conexión a PostgreSQL.',
             error,
         );
 
