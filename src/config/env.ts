@@ -38,7 +38,65 @@ function getBoolean(name: string, defaultValue: boolean): boolean {
     if (value === 'true') return true;
     if (value === 'false') return false;
 
-    throw new Error(`${name} must be true or false`);
+    throw new Error(`${name} debe ser true o false.`);
+}
+
+function getCorsOrigins(): string[] {
+    const configuredValue = process.env.CORS_ORIGINS;
+    if (!configuredValue && process.env.NODE_ENV === 'production') {
+        throw new Error('CORS_ORIGINS es obligatoria en producción.');
+    }
+    const configured = configuredValue ?? 'http://localhost:5173';
+    const origins = configured
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+
+    if (origins.length === 0) {
+        throw new Error('CORS_ORIGINS debe contener al menos un origen permitido.');
+    }
+
+    for (const origin of origins) {
+        let parsed: URL;
+        try {
+            parsed = new URL(origin);
+        } catch {
+            throw new Error('CORS_ORIGINS contiene un origen no válido.');
+        }
+
+        if (
+            !['http:', 'https:'].includes(parsed.protocol) ||
+            parsed.origin !== origin
+        ) {
+            throw new Error(
+                'Cada valor de CORS_ORIGINS debe ser un origen HTTP o HTTPS sin ruta.',
+            );
+        }
+    }
+
+    return origins;
+}
+
+function getTrustProxyHops(): number {
+    const rawValue = process.env.TRUST_PROXY_HOPS;
+    if (rawValue === undefined || rawValue === '') return 0;
+
+    const hops = Number(rawValue);
+    if (!Number.isInteger(hops) || hops < 0 || hops > 10) {
+        throw new Error('TRUST_PROXY_HOPS debe ser un entero entre 0 y 10.');
+    }
+
+    return hops;
+}
+
+function getJwtSecret(): string {
+    const secret = getRequiredEnv('JWT_SECRET');
+
+    if (Buffer.byteLength(secret, 'utf8') < 32) {
+        throw new Error('JWT_SECRET debe tener al menos 32 bytes.');
+    }
+
+    return secret;
 }
 
 export const env = Object.freeze({
@@ -52,4 +110,14 @@ export const env = Object.freeze({
         password: getRequiredEnv('DB_PASSWORD'),
         ssl: getBoolean('DB_SSL', false),
     }),
+
+    jwt: Object.freeze({
+        secret: getJwtSecret(),
+    }),
+
+    cors: Object.freeze({
+        origins: getCorsOrigins(),
+    }),
+
+    trustProxyHops: getTrustProxyHops(),
 });

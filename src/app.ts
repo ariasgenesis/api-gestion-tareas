@@ -1,12 +1,25 @@
 
 import express, { type Application, type Request, type Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import authRouter from './api/auth.routes';
+import taskRouter from './api/task.routes';
+import { env } from './config/env';
+import { notFoundHandler } from './middleware/not-found';
+import { errorHandler } from './middleware/error-handler';
+import { httpsOnlyInProduction } from './middleware/https-only';
 
 const app: Application = express();
+app.set('trust proxy', env.trustProxyHops);
 
 // Middlewares globales
-app.use(cors());
-app.use(express.json());
+app.use(helmet());
+app.use(cors({ origin: env.cors.origins }));
+app.use(httpsOnlyInProduction);
+app.use(express.json({ limit: '64kb' }));
+
+app.use('/auth', authRouter);
+app.use('/tasks', taskRouter);
 
 // Ruta raíz: información básica de la API
 app.get('/', (_req: Request, res: Response) => {
@@ -22,5 +35,8 @@ app.get('/health', (_req: Request, res: Response) => {
         mensaje: 'La API está funcionando correctamente.',
     });
 });
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
